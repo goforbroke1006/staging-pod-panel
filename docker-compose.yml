@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+
+  redis:
+    image: redis:4.0.5-alpine
+    hostname: redis
+    ports:
+      - 16379:6379
+    volumes:
+      - redis-data:/data
+
+  #####################
+  # ADMINISTRATION
+  #####################
+  pod-ui-gateway:
+    build:
+      context: ./pod-ui/nginx/
+      dockerfile: ./Dockerfile
+    ports:
+      - 18010:80
+    links:
+      - pod-ui-service
+    environment:
+      PROXY_HOST:  pod-ui-service
+      PROXY_PORT:  9000
+      USER:         "admin"
+      PASS:         "12345678"
+  pod-ui-service:
+    image: uifd/ui-for-docker
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  redis-data:
